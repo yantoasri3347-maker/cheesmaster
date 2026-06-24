@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChessMaster Pro</title>
+    <meta name="description" content="Game catur modern dengan AI, multiplayer online, turnamen, dan leaderboard.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <script>tailwind.config={theme:{extend:{fontFamily:{display:['Cinzel','serif'],sans:['DM Sans','sans-serif'],mono:['JetBrains Mono','monospace']}}}}</script>
+</head>
+<body>
+
+<!-- ====== LOGIN SCREEN ====== -->
+<div class="screen active" id="login-screen">
+    <div class="login-card">
+        <div class="login-icon"><i class="fas fa-paper-plane text-white text-2xl" style="transform:rotate(-15deg);"></i></div>
+        <h2 class="font-display text-xl font-bold text-center mb-1" style="color:var(--fg);">ChessMaster Pro</h2>
+        <p class="text-center text-xs mb-6" style="color:var(--muted);">Masuk dengan username Telegram Anda</p>
+        <div class="relative mb-1">
+            <i class="fas fa-at absolute left-4 top-1/2 -translate-y-1/2 text-sm" style="color:rgba(255,255,255,.2);"></i>
+            <input id="login-input" type="text" class="tg-input" placeholder="username" maxlength="20" autocomplete="off">
+        </div>
+        <div class="login-error" id="login-error">Username harus 3-20 karakter</div>
+        <button id="login-btn" class="tg-btn"><i class="fas fa-sign-in-alt mr-2"></i>Masuk</button>
+        <p class="text-center text-[10px] mt-4" style="color:var(--muted);">Data disimpan secara lokal di perangkat Anda</p>
+    </div>
+</div>
+
+<!-- ====== DASHBOARD SCREEN ====== -->
+<div class="screen" id="dashboard-screen">
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-logo">
+            <i class="fas fa-chess-king" style="color:var(--accent);font-size:18px;"></i>
+            <span class="font-display font-bold text-sm" style="color:var(--accent);">ChessMaster</span>
+        </div>
+        <div class="sidebar-user" id="sidebar-user">
+            <div class="avatar" id="sidebar-avatar">P</div>
+            <div class="min-w-0"><div class="font-semibold text-sm truncate" id="sidebar-name">Pemain</div><div class="text-[10px]" style="color:var(--muted);">@username</div></div>
+        </div>
+        <nav>
+            <div class="nav-item active" data-view="home"><i class="fas fa-home"></i><span>Home</span></div>
+            <div class="nav-item" data-view="leaderboard"><i class="fas fa-trophy"></i><span>Peringkat</span></div>
+            <div class="nav-item" data-view="profile"><i class="fas fa-user"></i><span>Profil</span></div>
+            <div class="nav-item" data-view="tournament"><i class="fas fa-crown"></i><span>Turnamen</span></div>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="nav-item" id="btn-logout" style="color:#f87171;border-left-color:transparent;"><i class="fas fa-sign-out-alt"></i><span>Keluar</span></div>
+        </div>
+    </aside>
+    <div class="main-content">
+        <div class="dash-header"><button class="menu-btn" id="menu-btn"><i class="fas fa-bars"></i></button><h2 class="font-display text-lg font-bold" id="page-title">Home</h2></div>
+        <div class="view active" id="view-home">
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6" id="home-stats"></div>
+            <h3 class="text-sm font-bold mb-3" style="color:var(--muted);">Mulai Bermain</h3>
+            <div class="home-grid mb-6">
+                <div class="play-card" data-game="ai"><div class="card-icon" style="background:rgba(212,168,67,.12);color:var(--accent);"><i class="fas fa-robot"></i></div><h4 class="font-bold text-sm mb-1">vs Komputer</h4><p class="text-[11px]" style="color:var(--muted);">Latih strategi melawan AI 3 tingkat kesulitan</p></div>
+                <div class="play-card" data-game="local"><div class="card-icon" style="background:rgba(34,158,217,.12);color:#229ED9;"><i class="fas fa-users"></i></div><h4 class="font-bold text-sm mb-1">2 Pemain Lokal</h4><p class="text-[11px]" style="color:var(--muted);">Bermain berdua di perangkat yang sama</p></div>
+                <div class="play-card" data-game="online"><div class="card-icon" style="background:rgba(110,231,160,.12);color:#6ee7a0;"><i class="fas fa-globe"></i></div><h4 class="font-bold text-sm mb-1">Online</h4><p class="text-[11px]" style="color:var(--muted);">Tantang teman jarak jauh via room code</p></div>
+                <div class="play-card" data-game="tourney-play"><div class="card-icon" style="background:rgba(248,113,113,.12);color:#f87171;"><i class="fas fa-crown"></i></div><h4 class="font-bold text-sm mb-1">Turnamen Cepat</h4><p class="text-[11px]" style="color:var(--muted);">Ikuti turnamen bracket 8 pemain vs AI</p></div>
+            </div>
+            <h3 class="text-sm font-bold mb-3" style="color:var(--muted);">Partai Terakhir</h3>
+            <div id="recent-games" class="flex flex-col gap-2"></div>
+        </div>
+        <div class="view" id="view-leaderboard">
+            <div class="flex gap-2 mb-4 flex-wrap"><button class="g-style active" data-lb-filter="all">Semua</button><button class="g-style" data-lb-filter="1">Mudah</button><button class="g-style" data-lb-filter="2">Sedang</button><button class="g-style" data-lb-filter="3">Sulit</button></div>
+            <div class="g-card p-0 overflow-hidden"><table class="lb-table"><thead><tr><th>#</th><th>Pemain</th><th>Level</th><th>Menang</th><th>Terakhir</th></tr></thead><tbody id="lb-body"></tbody></table></div>
+        </div>
+        <div class="view" id="view-profile">
+            <div class="profile-header" id="profile-header"></div>
+            <h3 class="text-sm font-bold mb-3" style="color:var(--muted);">Statistik</h3>
+            <div class="profile-stats mb-5" id="profile-stats"></div>
+            <h3 class="text-sm font-bold mb-3" style="color:var(--muted);">Riwayat Partai</h3>
+            <div id="profile-games" class="flex flex-col gap-2"></div>
+        </div>
+        <div class="view" id="view-tournament">
+            <div class="flex gap-2 mb-4"><button class="g-btn-primary g-btn" id="btn-create-tourney"><i class="fas fa-plus"></i> Buat Turnamen Baru</button></div>
+            <div id="tourney-list"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ====== GAME SCREEN ====== -->
+<div class="screen" id="game-screen">
+    <div class="game-top-bar">
+        <button class="g-btn" id="btn-back-dash"><i class="fas fa-arrow-left"></i> Dashboard</button>
+        <span class="font-display text-sm font-bold" style="color:var(--accent);" id="game-mode-label">vs AI</span>
+        <button class="g-btn" id="btn-sound"><i class="fas fa-volume-up text-xs"></i></button>
+    </div>
+    <div class="game-layout">
+        <div class="board-col">
+            <div class="review-banner hidden" id="review-banner"><i class="fas fa-eye text-xs"></i><span>Tinjauan <strong id="review-step">1</strong></span><button class="g-btn" id="btn-exit-review" style="padding:2px 8px;font-size:10px;"><i class="fas fa-times"></i></button></div>
+            <div class="player-bar" id="bar-top"><div class="turn-dot" id="dot-top"></div><div class="flex-1 min-w-0"><div class="flex items-center gap-2"><span class="font-semibold text-xs truncate" id="name-top">Hitam</span><span id="label-top" class="text-[9px] px-1.5 py-0.5 rounded-full hidden" style="background:rgba(212,168,67,.1);color:var(--muted);">AI</span><span id="online-ind-top" class="hidden flex items-center gap-1"><div class="online-dot"></div></span><span class="timer-display timer-safe hidden" id="timer-top">10:00</span></div><div class="captured-row mt-0.5" id="captured-top"></div></div></div>
+            <div class="flex gap-2 items-stretch">
+                <div class="eval-bar-wrap" id="eval-wrap"><div class="eval-bar-white" id="eval-white" style="height:50%;"></div><div class="eval-bar-black" id="eval-black" style="height:50%;"></div><span class="eval-label eval-label-top" id="eval-label-top"></span><span class="eval-label eval-label-bot" id="eval-label-bot"></span></div>
+                <div class="board-frame" id="board-frame"><div class="board-grid" id="board" role="grid" aria-label="Papan Catur"></div></div>
+            </div>
+            <div class="player-bar" id="bar-bottom"><div class="turn-dot" id="dot-bottom"></div><div class="flex-1 min-w-0"><div class="flex items-center gap-2"><span class="font-semibold text-xs truncate" id="name-bottom">Putih</span><span id="label-bottom" class="text-[9px] px-1.5 py-0.5 rounded-full hidden" style="background:rgba(212,168,67,.1);color:var(--muted);">AI</span><span id="online-ind-bot" class="hidden flex items-center gap-1"><div class="online-dot"></div></span><span class="timer-display timer-safe hidden" id="timer-bottom">10:00</span></div><div class="captured-row mt-0.5" id="captured-bottom"></div></div></div>
+            <div class="status-bar" id="status-bar">Giliran Putih</div>
+        </div>
+        <div class="side-col">
+            <div class="g-card p-2 flex gap-1.5" id="game-mode-btns"><button class="g-btn active flex-1 justify-center text-[10px]" data-gm="ai"><i class="fas fa-robot"></i> AI</button><button class="g-btn flex-1 justify-center text-[10px]" data-gm="local"><i class="fas fa-users"></i> Lokal</button><button class="g-btn flex-1 justify-center text-[10px]" data-gm="online"><i class="fas fa-globe"></i> Online</button></div>
+            <div class="g-card p-2 hidden" id="ai-settings"><div class="g-section">Kesulitan</div><div class="flex gap-1.5"><button class="g-style active flex-1" data-level="1">Mudah</button><button class="g-style flex-1" data-level="2">Sedang</button><button class="g-style flex-1" data-level="3">Sulit</button></div></div>
+            <div class="g-card p-2 hidden" id="online-settings">
+                <div class="g-section">Multiplayer Online</div>
+                <div id="online-id-input" class="mb-2"><input id="player-name-game" type="text" maxlength="12" placeholder="Nama tampilan..." class="w-full px-3 py-1.5 rounded-lg text-xs font-medium outline-none" style="background:rgba(0,0,0,.3);border:1px solid var(--border);color:var(--fg);"></div>
+                <div class="flex gap-1.5"><button id="btn-create-room" class="g-btn-primary g-btn flex-1 justify-center text-[10px]"><i class="fas fa-plus"></i> Buat</button><button id="btn-join-room" class="g-btn flex-1 justify-center text-[10px]"><i class="fas fa-sign-in-alt"></i> Gabung</button></div>
+                <div id="room-info" class="hidden mt-2 text-center"><div class="text-[9px] mb-1" style="color:var(--muted);">Kode Room</div><div class="room-code" id="room-code-display">------</div><div class="text-[9px] mt-1" style="color:var(--muted);" id="room-status">Menunggu...</div><button id="btn-copy-code" class="g-btn mt-1.5" style="font-size:9px;"><i class="fas fa-copy"></i> Salin</button></div>
+                <div id="join-info" class="hidden mt-2"><div class="flex gap-1.5"><input id="join-code-input" type="text" maxlength="6" placeholder="ABC123" class="flex-1 px-3 py-1.5 rounded-lg text-xs font-bold text-center uppercase outline-none" style="background:rgba(0,0,0,.3);border:1px solid var(--border);color:var(--accent);font-family:'JetBrains Mono',monospace;letter-spacing:3px;"><button id="btn-do-join" class="g-btn-primary g-btn text-[10px]"><i class="fas fa-arrow-right"></i></button></div><button id="btn-cancel-join" class="g-btn mt-1.5 w-full justify-center" style="font-size:9px;">Batal</button></div>
+            </div>
+            <div class="g-card p-2"><div class="g-section">Jam Catur</div><div class="flex gap-1.5 flex-wrap"><button class="g-style active" data-timer="0">Tanpa</button><button class="g-style" data-timer="180">3m</button><button class="g-style" data-timer="300">5m</button><button class="g-style" data-timer="600">10m</button></div></div>
+            <div class="g-card p-2"><div class="g-section">Tema</div><div class="flex gap-1.5 mb-2" id="theme-swatches"><div class="theme-swatch active" data-theme="klasik" title="Klasik" style="background:linear-gradient(135deg,#f0d9b5 50%,#b58863 50%);"></div><div class="theme-swatch" data-theme="kayu" title="Kayu" style="background:linear-gradient(135deg,#e8c98e 50%,#a0724a 50%);"></div><div class="theme-swatch" data-theme="neon" title="Neon" style="background:linear-gradient(135deg,#111b2a 50%,#0a111e 50%);box-shadow:inset 0 0 0 1px rgba(0,255,136,.3);"></div><div class="theme-swatch" data-theme="mono" title="Mono" style="background:linear-gradient(135deg,#d4d4d4 50%,#888 50%);"></div></div><div class="g-section">Bidak</div><div class="flex gap-1.5" id="piece-styles"><button class="g-style active" data-style="klasik">Klasik</button><button class="g-style" data-style="3d">3D</button><button class="g-style" data-style="8bit">8-Bit</button></div></div>
+            <div class="g-card p-2 flex-1 min-h-0"><div class="flex items-center justify-between mb-1"><div class="g-section mb-0">Riwayat</div><span class="text-[9px]" style="color:var(--muted);" id="move-count">0</span></div><div class="move-list" id="move-list"><div class="text-center py-3 text-[9px]" style="color:var(--muted);">Belum ada langkah</div></div></div>
+            <div class="g-card p-2 flex gap-1.5"><button id="btn-new" class="g-btn-primary g-btn flex-1 justify-center text-[10px]"><i class="fas fa-plus"></i> Baru</button><button id="btn-undo" class="g-btn flex-1 justify-center text-[10px]"><i class="fas fa-undo"></i> Batal</button><button id="btn-flip" class="g-btn flex-1 justify-center text-[10px]"><i class="fas fa-sync-alt"></i> Balik</button></div>
+        </div>
+    </div>
+</div>
+
+<!-- Modals -->
+<div class="modal-overlay" id="promo-modal"><div class="modal-box g-card p-5 text-center" style="min-width:220px;backdrop-filter:blur(16px);"><h3 class="font-display text-sm font-bold mb-1" style="color:var(--accent);">Promosi Bidak</h3><p class="text-[10px] mb-3" style="color:var(--muted);">Pilih piece pengganti</p><div class="flex justify-center gap-2" id="promo-choices"></div></div></div>
+<div class="modal-overlay" id="gameover-modal"><div class="modal-box g-card p-6 text-center" style="min-width:240px;backdrop-filter:blur(16px);"><div class="text-4xl mb-2" id="go-icon"></div><h2 class="font-display text-lg font-bold mb-1" id="go-title" style="color:var(--accent);"></h2><p class="text-[11px] mb-4" style="color:var(--muted);" id="go-msg"></p><button class="g-btn-primary g-btn text-xs" id="btn-again"><i class="fas fa-redo"></i> Main Lagi</button></div></div>
+
+<div id="particles" class="fixed inset-0 pointer-events-none z-0" aria-hidden="true"></div>
+
+<!-- Script dimuat berurutan sesuai dependensi -->
+<script src="js/chess.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/online.js"></script>
+<script src="js/dashboard.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
